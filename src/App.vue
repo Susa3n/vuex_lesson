@@ -1,28 +1,35 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    susa3n的年龄为：{{$store.state.age}}
+    <hr>
+    我的年龄为: {{$store.getters.myAge}}
+    <hr>
+    <button @click="syncAdd">增加</button>
+    <button @click="asyncMinus">异步减少</button>
+    <hr>
+    <!-- <h2>{{$store.state.a.aAge}}</h2> -->
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
 
 export default {
   name: 'App',
-  components: {
-    HelloWorld
+  mounted(){
+    // console.log(this.$store.state.a);
+    console.log(this.$store._modules);
+  },
+  methods: { 
+    syncAdd() {
+      this.$store.commit('syncAdd',10)
+    },
+    asyncMinus() {
+      this.$store.dispatch('asyncMinus',5,5,5)
+    }
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+
 </style>
