@@ -15,10 +15,6 @@
 
 export default {
   name: 'App',
-  mounted(){
-    // console.log(this.$store.state.a);
-    console.log(this.$store._modules);
-  },
   methods: { 
     syncAdd() {
       this.$store.commit('syncAdd',10)
