@@ -15,12 +15,15 @@
 
 export default {
   name: 'App',
+  mounted() {
+    console.log(this.$store);
+  },
   methods: { 
     syncAdd() {
       this.$store.commit('syncAdd',10)
     },
     asyncMinus() {
-      this.$store.dispatch('asyncMinus',5,5,5)
+      this.$store.dispatch('asyncMinus',5)
     }
   }
 }
