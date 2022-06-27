@@ -1,33 +1,25 @@
-import { forEach } from './utils'
-
-class Module {
-  constructor(rawModule) {
-    this.state = rawModule.state
-    this._raw = rawModule
+import {forEach} from "@/utils/index"
+export class Module {
+  constructor(raw) {
     this._children = {}
+    this._rawState = raw.state
+    this._rawModule = raw
   }
-  getChildModule(name) {
-    return this._children[name]
-  }
-  addChildModule(name, module) {
-    this._children[name] = module
-  }
-  forEachWarpGetters(cb) {
-    this._raw.getters && forEach(this._raw.getters, cb)
-  }
-  forEachMutations(cb) {
-    this._raw.mutations && forEach(this._raw.mutations, cb)
-  }
-  forEachActions(cb) {
-    this._raw.actions && forEach(this._raw.actions, cb)
-  }
-  forEachChildInstall(cb) {
-    forEach(this._children, cb)
-  }
-  get getNameSpaced() {
-    return !!this._raw.nameSpaced
+  foreachActions(cb) {
+    this._rawModule.actions && forEach(this._rawModule.actions,cb)
+  } 
+
+  foreachComputed(cb) {
+    this._rawModule.getters && forEach(this._rawModule.getters,cb)
   }
 
+  foreachMutations(cb) {
+    this._rawModule.mutations && forEach(this._rawModule.mutations,cb)
+  }
+  getChildModule(key) {
+    return this._children[key]
+  }
+  addChildModule(key,module) {
+    this._children[key] = module
+  }
 }
-
-export default Module
