@@ -1,222 +1,53 @@
 <template>
-  <div style="margin: 20px">
-    <el-button type="primary" v-if="excelExport" @click="download"
-      >获取勾选的表格数据</el-button
-    >
-    <Table :config="config" ref="table" />
-  </div>
+  <TableForm :config="config" @submit="submit" ref="form" style="margin:20px;" />
 </template>
+
 <script>
-import Table from "@/components/Table";
+import TableForm from "./TableForm";
+
+const repayTypeList = {
+   averageCapital: '等额本金',
+   averageInterest: '等额本息'
+},
+columns = [
+  { prop: 'repaymentMethod', label: '还款方式', attr: {width: '180'}, format: ({ repaymentMethod }) => repayTypeList[repaymentMethod]},
+  { prop: 'productPer', label: '期数', attr: {width: '180'}, format: ({ productPer }) => `${+ productPer + 1}期(${productPer}个月)` },
+  { prop: 'costRate', label: '成本利率', attr: {minWidth: '110'}, edit: true, type: 'select', options: [{label: '5%', value: '5'}, {label: '10%', value: '10'}] },
+  { prop: 'price', label: '单价', attr: {minWidth: '140'}, edit: true, rules: [{required: true, message: '请输入单价'}, {pattern: /^(?!0+(?:\.0+)?$)(?:[1-9]\d*|0)(?:\.\d{1,})?$/, message: '单价须大于0，若有小数，则小数点后至少1位'}] },
+  { prop: 'company', label: '所属公司', attr: {minWidth: '110'}, edit: true },
+  { prop: 'product', label: '产品', attr: {minWidth: '110'}, edit: true, type: 'checkbox', options: [{label: '橘子', value: 'orange'}, {label: '苹果', value: 'apple'}] },
+  { prop: 'date', label: '日期', attr: {minWidth: '110'}, edit: true, type: 'date', required: false },
+  { prop: 'lock', label: '锁定', attr: {minWidth: '110'}, edit: true, type: 'switch' },
+  { prop: 'search', label: '搜索', attr: {minWidth: '110'}, edit: true, type: 'mixInput', cb: row => {console.log(row)}},
+  { prop: 'opt', label: '操作', attr: {minWidth: '110'}, edit: true },
+]
+
 export default {
   components: {
-    Table,
+    TableForm,
   },
-  data() {
+  data(){
     return {
       config: {
-        headers: [
-          {
-            prop: "contractCode",
-            label: "业务编号",
-            attrs: { width: 200, align: "center" },
-          },
-          // {
-          //   prop: "payeeAcctName",
-          //   label: "收款账户名",
-          //   type: "Link",
-          //   query: (row) => this.query(row),
-          //   attrs: { width: 260, align: "right" },
-          // },
-          { prop: "tradeAmt", label: "付款金额", type: "Currency" },
-          {
-            prop: "status",
-            label: "操作状态",
-            type: "Enum",
-            Enum: { name: "order" },
-          },
-          {
-            prop: "statistic",
-            label: "预警统计",
-            type: "Format",
-            format: (val) => this.format(val),
-          }, //自定义展示自己想要的数据格式
-          { prop: "reason", label: "原因", type: "Popover" },
-          {
-            prop: "payTime",
-            label: "付款时间",
-            type: "Date",
-            format: "yyyy-MM-dd hh:mm:ss",
-          }, //不设置format的话，日期格式默认为yyyy/MM/dd
-          {
-            prop: "monitorStatus",
-            label: "当前监控状态",
-            type: "Enum",
-            Enum: { name: "monitor" },
-          },
-        ].concat(this.getActions()),
-        //通过接口获取列表数据 - 这里的参数p就是子组件传过来的包含分页的参数
-        loadData: () =>
-          Promise.resolve({
-            data: [
-              {
-                id: 1,
-                contractCode: "",
-                payeeAcctName: "中国银行上海分行",
-                tradeAmt: "503869.265",
-                status: "00",
-                payTime: 1593585652530,
-                statistic: [
-                  { level: 3, total: 5 },
-                  { level: 2, total: 7 },
-                  { level: 1, total: 20 },
-                  { level: 0, total: 0 },
-                ],
-                customize: ["中国", "上海", "浦东新区"],
-                detail:
-                  "上海电气一般指上海电气集团股份有限公司。上海电气集团股份有限公司（Shanghai Electric Group Company Limited），简称上海电气，是中国机械工业销售排名第一位的装备制造集团。",
-              },
-              {
-                id: 2,
-                contractCode: "GLP-YG-B3-1111",
-                payeeAcctName: "中国邮政上海分行",
-                tradeAmt: "78956.85",
-                status: "CREATED",
-                payTime: 1593416718317,
-                reason:
-                  "Popover的属性与Tooltip很类似，它们都是基于Vue-popper开发的，因此对于重复属性，请参考Tooltip的文档，在此文档中不做详尽解释。",
-                detail:
-                  "上海电气集团股份有限公司（Shanghai Electric Group Company Limited），简称上海电气，是中国机械工业销售排名第一位的装备制造集团。",
-              },
-              {
-                id: 3,
-                contractCode: "HT1592985730310",
-                payeeAcctName: "招商银行上海支行",
-                tradeAmt: "963587123",
-                status: "PASS",
-                payTime: 1593420950772,
-                monitorStatus: "01",
-              },
-              {
-                id: 4,
-                contractCode: "pi239",
-                payeeAcctName: "广州物流有限公司",
-                tradeAmt: "875123966",
-                status: "REJECT",
-                payTime: 1593496609363,
-              },
-              {
-                id: 5,
-                contractCode: "0701001",
-                payeeAcctName: "建设银行上海分账",
-                tradeAmt: "125879125",
-                status: "REFUSE",
-                payTime: 1593585489177,
-              },
-            ],
-            total: 5
-          }),
-        hasCheckbox: true,
-        selectable: this.selectable,
-        reserveSelection: false,
-        rowKey: (row) => row.id,
+        columns,
+        data: [],
       },
-      status: "01",
-      permission: ["handle", "pass", "refuse", "reApply", "export"],
-    };
+    }
   },
-  computed: {
-    handle() {
-      return this.permission.some((n) => n == "handle");
-    },
-    pass() {
-      return this.permission.some((n) => n == "pass");
-    },
-    reject() {
-      return this.permission.some((n) => n == "reject");
-    },
-    refuse() {
-      return this.permission.some((n) => n == "refuse");
-    },
-    excelExport() {
-      return (
-        this.permission.some((n) => n == "handle") &&
-        this.permission.some((n) => n == "export")
-      );
-    },
+  mounted(){
+    const form = [
+      {repaymentMethod: '201602', productPer: '1', price: '5', company: '谷歌上海', date: '2021-01-03', lock: false},
+      {repaymentMethod: '201601', productPer: '3', costRate: '10', price: '', company: '雅虎北京', lock: true}
+    ]
+    // 模拟调接口回显数据
+    setTimeout(() => {
+      this.$refs.form.setData(form)
+    }, 2000)
   },
   methods: {
-    getActions() {
-      return {
-        prop: "action",
-        name: "操作",
-        type: "Action",
-        value: [
-          {
-            label: "查看",
-            click: (data) => {
-              console.log(data);
-            },
-          },
-          {
-            label: "办理",
-            click: (data) => {},
-            filter: ({ status }) => status == "CREATED" && this.handle,
-          },
-          {
-            label: "通过",
-            click: (data) => {},
-            filter: ({ status }) => status == "PASS" && this.pass,
-          },
-          {
-            label: "驳回",
-            click: (data) => {},
-            filter: ({ status }) => status == "REJECT" && this.reject,
-          },
-          {
-            label: "拒绝",
-            click: (data) => {},
-            filter: ({ status }) => status == "CREATED" && this.refuse,
-          },
-        ],
-      };
-    },
-    setParams() {
-      return {
-        name: "测试",
-        status: "01",
-        type: "CREATED",
-      };
-    },
-    query(row) {
-      return {
-        path: "/otherElTable", // 路由path
-        payload: {
-          id: row.id,
-          type: "link",
-        },
-      };
-    },
-    format(val) {
-      let str = "";
-      val.forEach((t) => {
-        str += '<span style="margin-right:5px;">' + t.total + "</span>";
-      });
-      return str;
-    },
-    selectable({ status }) {
-      return status == "REFUSE" ? false : true;
-    },
-    download() {
-      console.log(this.$refs.table.getChecked());
-    },
-  },
-};
-</script>
-<style>
-.action span {
-  margin-right: 10px;
-  color: #359c67;
-  cursor: pointer;
+    submit(res){
+      console.log(res)
+    }
+  }
 }
-</style>
+</script>

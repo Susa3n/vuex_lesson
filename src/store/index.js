@@ -1,18 +1,18 @@
 import Vue from 'vue'
-import Vuex from '../vuex/index'
-// import Vuex from 'vuex'
+import * as Vuex  from '../vuex/index'
 Vue.use(Vuex)
 
-// function logger() {
-//   return function(store) {
-//     let preValue = JSON.stringify(store.state)
-//     store.subscribe((mutationType, rootState) => {
-//       console.log(`preValue: ${preValue}`);
-//       console.log(`mutationType: ${{type:mutationType,rootState}}`);
-//       console.log(`nextValue: ${JSON.stringify(store.state)}`);
-//     })
-//   }
-// }
+function logger() {
+  return function(store) {
+    let preValue = JSON.stringify(store.state)
+    store.subscribe((mutationType, state) => {
+      console.log(`preValue: ${preValue}`);
+      console.log(`mutationType: ${JSON.stringify(mutationType)}`);
+      console.log(`nextValue: ${JSON.stringify(state)}`);
+      preValue = JSON.stringify(state)
+    })
+  }
+}
 
 function resetState () {
   return function(store) {
@@ -20,19 +20,18 @@ function resetState () {
     if(state) {
       store.replaceState(state)
     }
-    store.subscribe((mutationType,rootState)=> {
-      console.log('1111',store.state);
-      window.localStorage.setItem('VUEX:STATE',JSON.stringify(rootState))
+    store.subscribe((mutationType,state)=> {
+      window.localStorage.setItem('VUEX:STATE',JSON.stringify(state))
     })
   }
 }
 
 
 export default new Vuex.Store({
-  // plugins: [
-  //   // logger(),
-  //   resetState()
-  // ],
+  plugins: [
+    // logger(),
+    resetState()
+  ],
   state: {
     age: 18
   },
@@ -46,9 +45,9 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    asyncMinus({ commit }, payload) {
+    asyncMinus(context, payload) {
       setTimeout(() => {
-        commit('syncMinus', payload)
+        context.commit('syncMinus', payload)
       }, 1000);
     }
   },
